@@ -1,0 +1,366 @@
+/* ============================================================
+   Асамблея ОМБ — база: шрифты, палитра, reset, скроллбары
+   ============================================================ */
+
+@font-face {
+  font-family: 'PT Mono';
+  src: url('../assets/fonts/ptmono-cyrillic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'PT Mono';
+  src: url('../assets/fonts/ptmono-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+2116, U+2122, U+2190-2193;
+}
+@font-face {
+  font-family: 'Oswald';
+  src: url('../assets/fonts/oswald-cyrillic.woff2') format('woff2');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Oswald';
+  src: url('../assets/fonts/oswald-latin.woff2') format('woff2');
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+2000-206F, U+2116, U+2122;
+}
+
+:root {
+  --bg: #1c1713;
+  --surface: #302821;
+  --surface-2: #3a312a;
+  --surface-3: #443a31;
+  --overlay: #42382f;
+  --scrim: rgba(14, 10, 8, .78);
+  --line: #574a3d;
+  --line-soft: #453b31;
+  --paper: #d7c9aa;
+  --paper-light: #e8ddc4;
+  --paper-dim: #c6b795;
+  --ink: #29241e;
+  --ink-soft: #5a5145;
+  --text: #e6dcc8;
+  --text-dim: #b3a590;
+  --accent: #7c3934;
+  --accent-hover: #8d453f;
+  --ok: #6d7951;
+  --ok-bright: #839160;
+  --warn: #b18d4f;
+  --danger: #8d453f;
+  --info: #5c738e;
+  --brass: #b2965f;
+  --brass-light: #d8bf86;
+  --brass-dark: #7f673b;
+  --terminal-bg: #120e0b;
+  --beige-line: #c9b99a;
+  --wood-dark: #241a13;
+
+  --font-doc: 'PT Mono', 'Courier New', ui-monospace, monospace;
+  --font-display: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  --font-ui: Arial, 'Helvetica Neue', 'Segoe UI', sans-serif;
+
+  --radius: 5px;
+  --shadow: 0 16px 46px rgba(0, 0, 0, .5);
+  --shadow-deep: 0 26px 70px rgba(0, 0, 0, .62);
+  --header-h: 72px;
+  --ticker-h: 32px;
+  --status-h: 28px;
+  --left-w: 288px;
+  --side-w: 376px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: #16120f;
+  background-image:
+    radial-gradient(1100px 640px at 50% -12%, rgba(150, 116, 78, .12), transparent 62%),
+    radial-gradient(900px 600px at 100% 112%, rgba(52, 40, 30, .6), transparent 62%),
+    url('../images/paper-dark.jpg');
+  background-size: auto, auto, 960px auto;
+  background-blend-mode: normal, normal, multiply;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow: hidden;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Фон: карта мира, старые флаги, ламповый свет, виньетка, зерно */
+.app-bg,
+.app-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.app-bg { z-index: 0; overflow: hidden; }
+.app-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(760px 460px at 50% 12%, rgba(188, 148, 94, .1), transparent 66%),
+    radial-gradient(1200px 800px at 50% 118%, rgba(8, 6, 4, .62), transparent 62%),
+    url('../images/world-map.jpg') right -60px bottom -110px / min(980px, 96vw) auto no-repeat;
+  opacity: .3;
+  filter: sepia(.55) brightness(.72) contrast(1.05);
+  mix-blend-mode: luminosity;
+}
+.app-bg::after {
+  content: '';
+  position: absolute;
+  left: -50px;
+  top: 74px;
+  width: 420px;
+  height: 340px;
+  background: url('../images/flags-chart.jpg') left top / contain no-repeat;
+  opacity: .07;
+  filter: sepia(1) contrast(.85);
+  transform: rotate(-2deg);
+}
+.app-vignette {
+  z-index: 30;
+  box-shadow: inset 0 0 190px 40px rgba(0, 0, 0, .22);
+  background-image: radial-gradient(120% 90% at 50% 0%, transparent 62%, rgba(10, 7, 5, .16) 100%);
+}
+/* Шумовые оверлеи удалены: они закрывали текст и интерфейс. */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+p { margin: 0 0 10px; }
+
+a { color: var(--info); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button { font-family: inherit; }
+
+img { max-width: 100%; }
+
+::selection {
+  background: rgba(126, 59, 55, .75);
+  color: #f2e9d6;
+}
+
+:focus-visible {
+  outline: 2px solid var(--beige-line);
+  outline-offset: 2px;
+}
+
+/* Скроллбары — в палитре сайта */
+* {
+  scrollbar-color: var(--line) rgba(0, 0, 0, .2);
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: rgba(0, 0, 0, .18); }
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border: 2px solid rgba(0, 0, 0, .18);
+  border-radius: 6px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+*::-webkit-scrollbar-corner { background: transparent; }
+
+/* Иконки из спрайта */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: -3px;
+}
+.icon-lg { width: 20px; height: 20px; }
+
+/* Утилиты */
+.mono { font-family: var(--font-doc); }
+.display { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .07em; }
+.caps { text-transform: uppercase; letter-spacing: .08em; }
+.muted { color: var(--text-dim); }
+.small { font-size: 12px; }
+.tiny { font-size: 10.5px; letter-spacing: .04em; }
+.hidden { display: none !important; }
+[hidden] { display: none !important; }
+.spacer { flex: 1; }
+.nowrap { white-space: nowrap; }
+.center { text-align: center; }
+.clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.divider { border: none; border-top: 1px solid var(--line-soft); margin: 12px 0; }
+
+/* Бумажная плашка */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-doc);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper) url('../images/paper-texture.jpg') center / cover;
+  padding: 2px 8px;
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .35);
+}
+
+/* Общие анимации */
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(7px); } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(8px) scale(.995); } }
+@keyframes stampIn {
+  0% { opacity: 0; transform: scale(1.35) rotate(-2deg); }
+  60% { opacity: .85; transform: scale(.97) rotate(-8deg); }
+  100% { opacity: .72; transform: scale(1) rotate(-8deg); }
+}
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes lampFlicker {
+  0%, 100% { opacity: .55; }
+  47% { opacity: .55; }
+  48% { opacity: .38; }
+  49% { opacity: .55; }
+}
+@keyframes pulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(177, 141, 79, .45); }
+  70% { box-shadow: 0 0 0 8px rgba(177, 141, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(177, 141, 79, 0); }
+}
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.view-in { animation: fadeUp .22s ease-out; }
+
+/* Загрузочный экран */
+.boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background:
+    radial-gradient(620px 420px at 50% 48%, rgba(92, 67, 39, .28), transparent 70%),
+    #17110d;
+  color: var(--paper-light);
+  transition: opacity .42s ease, visibility .42s ease;
+}
+.boot-loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.boot-globe {
+  width: 170px;
+  height: 170px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+  animation: bootFloat 4.4s ease-in-out infinite;
+}
+.boot-globe-svg {
+  width: 158px;
+  height: 158px;
+  filter: drop-shadow(0 0 22px rgba(178, 150, 95, .35));
+}
+.boot-globe-grid {
+  transform-origin: 80px 80px;
+  animation: bootSpin 14s linear infinite;
+}
+.boot-orbit {
+  transform-origin: 80px 80px;
+  animation: bootSpin 26s linear infinite reverse;
+}
+.boot-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 600;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #efe4cb;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .55);
+}
+.boot-rule {
+  width: 186px;
+  height: 2px;
+  background: rgba(178, 150, 95, .22);
+  overflow: hidden;
+  position: relative;
+}
+.boot-rule::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 54px;
+  background: linear-gradient(90deg, transparent, var(--brass-light), transparent);
+  animation: bootScan 2.2s ease-in-out infinite;
+}
+.boot-sub {
+  font-family: var(--font-doc);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #c9b795;
+  text-align: center;
+}
+@keyframes bootSpin { to { transform: rotate(360deg); } }
+@keyframes bootFloat { 50% { transform: translateY(-7px); } }
+@keyframes bootScan {
+  0% { transform: translateX(-60px); }
+  100% { transform: translateX(200px); }
+}
+
+/* Принтер */
+@media print {
+  body { overflow: visible; background: #fff; }
+  .app-bg, .app-vignette { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

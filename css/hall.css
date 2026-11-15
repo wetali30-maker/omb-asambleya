@@ -1,0 +1,551 @@
+/* ============================================================
+   Зал заседаний: фото-фон, SVG, места, президиум, голосование
+   ============================================================ */
+
+.hall-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, rgba(20, 15, 11, .72) 0%, rgba(22, 17, 13, .82) 46%, rgba(16, 12, 9, .9) 100%),
+    radial-gradient(700px 380px at 50% 0%, rgba(196, 156, 98, .14), transparent 68%),
+    url('../images/hall.jpg') center 40% / cover no-repeat,
+    #241c16;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, .35),
+    inset 0 0 90px rgba(0, 0, 0, .55),
+    var(--shadow);
+  overflow: hidden;
+}
+.hall-view::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% 0%, transparent 58%, rgba(8, 5, 4, .55) 100%),
+    linear-gradient(180deg, rgba(10, 7, 5, .35), transparent 18%, transparent 78%, rgba(10, 7, 5, .45));
+  z-index: 2;
+}
+.hall-view::after {
+  content: none;
+}
+
+.hall-frame {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  padding: 4px 6px 0;
+  z-index: 4;
+}
+.hall-stage {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-x pan-y;
+}
+.hall-zoom {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 42%;
+  transition: transform .2s ease-out;
+  will-change: transform;
+}
+.hall-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-doc);
+  user-select: none;
+}
+
+/* Инструменты зала (зум) */
+.hall-tools {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.hall-tools .icon-btn {
+  width: 30px;
+  height: 28px;
+  background: rgba(12, 9, 7, .62);
+  border-color: rgba(178, 150, 95, .32);
+  color: #b7a78c;
+  backdrop-filter: blur(2px);
+}
+.hall-tools .icon-btn:hover { color: var(--paper-light); border-color: var(--brass); }
+.hall-tools .icon-btn .icon { width: 14px; height: 14px; }
+
+/* Штамп на сцене */
+.hall-secret {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  z-index: 5;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: #b06a61;
+  border: 3px double #a35f57;
+  padding: 3px 12px 4px;
+  transform: rotate(-5deg);
+  opacity: .48;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  text-shadow: 0 0 10px rgba(163, 95, 87, .25);
+}
+.hall-secret small {
+  display: block;
+  font-family: var(--font-doc);
+  font-size: 6.5px;
+  letter-spacing: .26em;
+  text-align: center;
+  border-top: 1px solid currentColor;
+  margin-top: 2px;
+  padding-top: 2px;
+}
+.hall-plate {
+  position: absolute;
+  left: 18px;
+  bottom: 10px;
+  z-index: 5;
+  padding: 4px 10px 5px;
+  background: linear-gradient(180deg, #c4aa76, #9d824f);
+  border: 1px solid #6f5a3a;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 218, .5), 0 2px 6px rgba(0, 0, 0, .5);
+  font-family: var(--font-doc);
+  font-size: 7px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #33291a;
+  pointer-events: none;
+}
+
+/* ---------- Места ---------- */
+.hall-svg .seat { cursor: pointer; }
+.hall-svg .seat .seat-chair {
+  fill: #2c241e;
+  stroke: var(--line);
+  stroke-width: 1.2;
+  transition: fill .15s, stroke .15s;
+}
+.hall-svg .seat.empty .seat-chair {
+  stroke-dasharray: 3 3;
+  stroke: #6b5d4d;
+  fill: #241d18;
+}
+.hall-svg .seat.empty .seat-num {
+  fill: #8a7c69;
+  font-size: 8.5px;
+  letter-spacing: .04em;
+}
+.hall-svg .seat.empty:hover .seat-chair {
+  fill: #4a312c;
+  stroke: var(--accent-hover);
+  stroke-dasharray: none;
+}
+.hall-svg .seat.empty:hover .seat-num { fill: var(--paper-light); }
+.hall-svg .seat .seat-desk {
+  fill: url(#deskGrad);
+  stroke: #5c4d3e;
+  stroke-width: 1;
+}
+.hall-svg .seat.empty .seat-desk { fill: #342b24; stroke: #4a3e33; }
+.hall-svg .seat .seat-plate {
+  fill: url(#brassGrad);
+  stroke: #6d5735;
+  stroke-width: .6;
+}
+.hall-svg .seat.empty .seat-plate { fill: #3a3129; stroke: #52463a; }
+.hall-svg .seat .seat-desk-num {
+  fill: #3d3222;
+  font-size: 6.2px;
+  letter-spacing: .04em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.hall-svg .seat.empty .seat-desk-num { fill: #8f8069; }
+.hall-svg .seat .seat-name {
+  fill: #d3c6ad;
+  font-size: 9.2px;
+  letter-spacing: .015em;
+  text-anchor: middle;
+  pointer-events: none;
+}
+/* Имена президиума — крупно и контрастно */
+.hall-svg .chair-seat .chair-name {
+  fill: #f4e9d1;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  paint-order: stroke;
+  stroke: rgba(18, 12, 8, .55);
+  stroke-width: 1.6px;
+}
+.hall-svg .chair-seat .chair-country {
+  fill: #c4b394;
+  font-size: 8.5px;
+  letter-spacing: .14em;
+}
+.hall-svg .chair-seat .chair-empty-label { font-size: 9px; }
+.hall-svg .chair-seat .chair-plate-text { font-size: 6.6px; }
+.hall-svg .seat.observer .seat-name { fill: #93a4ba; }
+.hall-svg .seat .seat-flag {
+  stroke: #1c1713;
+  stroke-width: .8;
+}
+.hall-svg .seat .avatar-ring {
+  fill: #33291f;
+  stroke: var(--beige-line);
+  stroke-width: 1.4;
+}
+.hall-svg .seat.observer .avatar-ring {
+  stroke: var(--info);
+  stroke-dasharray: 3 2;
+}
+.hall-svg .seat .avatar-initials {
+  fill: var(--paper-light);
+  font-size: 10px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.hall-svg .seat .vote-dot {
+  stroke: #14100d;
+  stroke-width: 1;
+}
+.hall-svg .seat:hover .avatar-ring {
+  stroke: var(--paper-light);
+  stroke-width: 2.2;
+}
+.hall-svg .seat.me .seat-desk { stroke: var(--brass); stroke-width: 1.6; }
+.hall-svg .seat.me .avatar-ring { stroke: var(--brass-light); }
+.hall-svg .seat.speaking .avatar-ring {
+  stroke: #d8bf86;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 4px rgba(216, 191, 134, .75));
+}
+.hall-svg .seat.speaking .seat-desk {
+  stroke: #b99a5e;
+  stroke-width: 1.8;
+}
+.hall-svg .seat .speak-mark {
+  fill: #d8bf86;
+  font-size: 7px;
+  letter-spacing: .1em;
+  text-anchor: middle;
+}
+
+/* ---------- Президиум ---------- */
+.hall-svg .chair-desk {
+  fill: url(#chairWood);
+  stroke: #6a5946;
+  stroke-width: 1.4;
+}
+.hall-svg .chair-desk-shade {
+  fill: rgba(20, 14, 10, .3);
+  pointer-events: none;
+}
+.hall-svg .chair-edge {
+  fill: none;
+  stroke: rgba(216, 191, 134, .22);
+  stroke-width: .8;
+}
+.hall-svg .chair-label {
+  fill: #d3c19e;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .3em;
+  text-anchor: middle;
+}
+.hall-svg .chair-role-sub {
+  fill: #8d7c63;
+  font-size: 6.2px;
+  letter-spacing: .24em;
+  text-anchor: middle;
+}
+.hall-svg .chair-empty {
+  fill: rgba(20, 15, 11, .55);
+  stroke: #6b5d4d;
+  stroke-dasharray: 3 3;
+  stroke-width: 1.2;
+}
+.hall-svg .chair-empty-label {
+  fill: #8a7c69;
+  font-size: 7.5px;
+  letter-spacing: .08em;
+  text-anchor: middle;
+}
+.hall-svg .chair-hover:hover .chair-desk,
+.hall-svg .chair-hover:hover .chair-empty { stroke: var(--brass); }
+.hall-svg .chair-plate-brass {
+  fill: url(#brassGrad);
+  stroke: #6d5735;
+  stroke-width: .7;
+}
+.hall-svg .chair-plate-text {
+  fill: #33291a;
+  font-size: 5.4px;
+  letter-spacing: .08em;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.hall-svg .chair-plate-name {
+  fill: #2c2318;
+  font-family: var(--font-display);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.hall-svg .rostrum {
+  fill: #2f261f url(#chairWood);
+  stroke: #55483a;
+  stroke-width: 1;
+}
+.hall-svg .rostrum-shade { fill: rgba(15, 11, 8, .35); }
+.hall-svg .gavel {
+  stroke: #a08a6c;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+}
+.hall-svg .wall-title {
+  fill: #b0a088;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: .5em;
+  text-anchor: middle;
+}
+.hall-svg .wall-sub {
+  fill: #7b6d5b;
+  font-size: 6.6px;
+  letter-spacing: .26em;
+  text-anchor: middle;
+}
+.hall-svg .wall-panel {
+  fill: rgba(38, 30, 24, .55);
+  stroke: rgba(178, 150, 95, .22);
+  stroke-width: 1;
+}
+.hall-svg .wall-clock { fill: rgba(214, 203, 178, .9); stroke: #5d4d3a; stroke-width: 1.2; }
+.hall-svg .wall-clock-hand { stroke: #3a2f24; stroke-width: 1.6; stroke-linecap: round; }
+.hall-svg .wall-clock-tick { stroke: #6b5a44; stroke-width: .8; }
+.hall-svg .floor-line {
+  fill: none;
+  stroke: #3a2f27;
+  stroke-width: 1;
+  stroke-dasharray: 1 6;
+}
+.hall-svg .banner-flag {
+  fill: #3d332a;
+  stroke: #5c4d3e;
+  stroke-width: .8;
+}
+.hall-svg .banner-emblem { opacity: .55; }
+.hall-svg .desk-sheet { cursor: pointer; }
+.hall-svg .desk-sheet .sheet-paper {
+  fill: var(--paper-light);
+  stroke: #8f8168;
+  stroke-width: .8;
+  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, .55));
+  transition: fill .15s;
+}
+.hall-svg .desk-sheet:hover .sheet-paper { fill: #f0e7d2; }
+.hall-svg .desk-sheet .sheet-label {
+  fill: #6b6151;
+  font-size: 5px;
+  letter-spacing: .12em;
+  text-anchor: middle;
+  text-transform: uppercase;
+}
+.hall-svg .desk-sheet .sheet-empty {
+  fill: #9a8d77;
+  font-size: 5.2px;
+  letter-spacing: .05em;
+  text-anchor: middle;
+}
+
+/* ---------- Легенда зала ---------- */
+.hall-legend {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  padding: 6px 14px 7px;
+  border-top: 1px solid rgba(178, 150, 95, .2);
+  font-family: var(--font-doc);
+  font-size: 8.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #91836d;
+  background: linear-gradient(180deg, rgba(16, 12, 9, .55), rgba(12, 9, 7, .75));
+  position: relative;
+  z-index: 5;
+}
+.hall-legend .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.hall-legend .legend-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1px solid var(--line);
+  flex: none;
+}
+.hall-legend .legend-dot.free { border-style: dashed; background: transparent; border-color: #7a6a56; }
+.hall-legend .legend-dot.busy { background: var(--beige-line); border-color: var(--beige-line); }
+.hall-legend .legend-dot.eye { background: var(--info); border-color: var(--info); }
+.hall-legend .legend-dot.chair {
+  background: linear-gradient(180deg, #d8bf86, #9d824f);
+  border-color: #d8bf86;
+  border-radius: 1px;
+}
+.hall-legend .legend-dot.speaking { background: var(--warn); box-shadow: 0 0 6px rgba(177, 141, 79, .8); }
+.hall-legend .hint { color: #b6a68a; opacity: .85; display: inline-flex; gap: 6px; align-items: center; }
+.hall-legend .hint .icon { width: 12px; height: 12px; }
+.hall-legend .legend-chairs { color: #d2c3a6; }
+.hall-legend .legend-chairs b { color: #f0e3c8; font-weight: 400; }
+.hall-legend .legend-right { margin-left: auto; display: inline-flex; gap: 14px; align-items: center; }
+
+/* ---------- Панель идущего голосования ---------- */
+.voting-band {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 9px 14px;
+  background:
+    linear-gradient(180deg, rgba(126, 59, 55, .32), rgba(126, 59, 55, .17)),
+    url('../images/paper-dark.jpg') center / cover,
+    #2f2620;
+  border-top: 1px solid rgba(147, 82, 75, .6);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 190, .07);
+  position: relative;
+  z-index: 5;
+}
+.voting-band .vb-kicker {
+  font-family: var(--font-doc);
+  font-size: 8px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #d8a79f;
+  margin-bottom: 2px;
+}
+.voting-band .vb-label {
+  font-family: var(--font-doc);
+  font-size: 11.5px;
+  color: var(--paper-light);
+  letter-spacing: .03em;
+  line-height: 1.35;
+}
+.voting-band .vb-counts { display: flex; gap: 6px; flex-wrap: wrap; }
+.vchip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-family: var(--font-doc);
+  font-size: 8.5px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 3px 7px;
+  background: rgba(0, 0, 0, .28);
+}
+.vchip b { font-size: 11px; font-weight: 400; color: var(--text); }
+.vchip.for { border-color: rgba(110, 122, 82, .6); }
+.vchip.for b { color: #c3cda9; }
+.vchip.against { border-color: rgba(142, 70, 64, .65); }
+.vchip.against b { color: #d8a79f; }
+.vchip.abstain { border-color: rgba(176, 141, 79, .55); }
+.vchip.abstain b { color: #d6b97f; }
+
+.vote-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+.vote-btn {
+  padding: 6px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, .3);
+  color: var(--text);
+  font-family: var(--font-doc);
+  font-size: 9.5px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .14s;
+}
+.vote-btn:hover { border-color: var(--beige-line); }
+.vote-btn.for:hover { background: rgba(110, 122, 82, .2); }
+.vote-btn.against:hover { background: rgba(142, 70, 64, .22); }
+.vote-btn.abstain:hover { background: rgba(176, 141, 79, .18); }
+.vote-btn.for.active { background: #5d6845; border-color: #7d8a5e; color: #f1ead8; }
+.vote-btn.against.active { background: #7a3a35; border-color: #9c554d; color: #f3e3da; }
+.vote-btn.abstain.active { background: #8a6c3b; border-color: #b08d4f; color: #f5ecda; }
+.vote-btn:disabled { opacity: .38; cursor: not-allowed; }
+.voting-band.flash { animation: voteBandFlash 1s ease-out 2; }
+@keyframes voteBandFlash {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 220, 190, .07); }
+  45% { box-shadow: inset 0 0 0 2px rgba(216, 191, 134, .85), 0 0 26px rgba(216, 191, 134, .35); }
+}
+.voting-note {
+  width: 100%;
+  font-family: var(--font-doc);
+  font-size: 9px;
+  letter-spacing: .03em;
+  color: var(--text-dim);
+}
+
+/* ---------- Адаптив зала ---------- */
+@media (max-width: 1140px) {
+  .hall-secret { font-size: 15px; left: 16px; top: 14px; }
+  .hall-plate { display: none; }
+}
+
+@media (max-width: 900px) {
+  .hall-frame { padding: 2px 2px 0; }
+  .hall-legend { padding: 5px 10px; gap: 5px 12px; font-size: 8px; }
+  .hall-legend .legend-right { display: none; }
+  .voting-band { gap: 9px; padding: 8px 10px; }
+  .voting-band .vb-counts { display: none; }
+  .vote-btn { padding: 7px 10px; flex: 1; text-align: center; }
+  .vote-buttons { width: 100%; }
+  .voting-note { display: none; }
+  .hall-tools { right: 7px; top: 7px; }
+  .hall-tools .icon-btn { width: 28px; height: 26px; }
+  .hall-secret { font-size: 12px; letter-spacing: .18em; top: 10px; left: 12px; opacity: .35; }
+}
+
+@media (max-width: 640px) {
+  .hall-legend {
+    gap: 4px 10px;
+    font-size: 7.5px;
+    padding: 4px 8px;
+  }
+  .hall-legend .hint { display: none; }
+  .hall-legend .legend-dot { width: 7px; height: 7px; }
+  .hall-secret { display: none; }
+}
+
+@media (max-height: 540px) and (orientation: landscape) {
+  .hall-legend { padding: 3px 10px; font-size: 7.5px; }
+  .hall-tools { top: 4px; right: 5px; flex-direction: row; }
+  .hall-tools .icon-btn { width: 26px; height: 24px; }
+}

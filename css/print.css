@@ -1,0 +1,64 @@
+/* ============================================================
+   Печать: только документ, A4. «Печать / Сохранить как PDF»
+   ============================================================ */
+
+#print-root { display: none; }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  body::before { display: none !important; }
+
+  #app, #modal-root, #toast-root, .icon-sprite {
+    display: none !important;
+  }
+
+  #print-root {
+    display: block !important;
+  }
+
+  #print-root .paper-doc {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: #fbf7ec !important;
+    font-size: 12px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #print-root .paper-doc::before { display: none; }
+  #print-root .doc-stamp,
+  #print-root .doc-table th,
+  #print-root .doc-emblem {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  #print-root .doc-stamp {
+    position: fixed;
+    right: 18mm;
+    top: 46%;
+  }
+  #print-root .paper-doc,
+  #print-root .doc-text,
+  #print-root .doc-meta {
+    overflow: visible;
+  }
+  #print-root .no-print { display: none !important; }
+
+  .doc-section-label {
+    break-after: avoid;
+  }
+  .doc-table { break-inside: avoid; }
+  .doc-sign { break-inside: avoid; }
+}

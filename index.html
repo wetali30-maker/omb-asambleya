@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Асамблея ОМБ — Организация Мировой Безопасности</title>
+  <meta name="description" content="Асамблея ОМБ — ролевая военно-политическая игра. Зал заседаний, президиум, резолюции, голосования, архив документов.">
+  <meta name="theme-color" content="#221b16">
+  <link rel="icon" href="assets/emblem.jpg">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/hall.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/documents.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body>
+
+<div id="boot-loader" class="boot-loader" role="status" aria-live="polite">
+  <div class="boot-globe" aria-hidden="true">
+    <svg class="boot-globe-svg" viewBox="0 0 160 160">
+      <defs>
+        <radialGradient id="bootSphere" cx="36%" cy="28%" r="76%">
+          <stop offset="0%" stop-color="#e0c68d"></stop>
+          <stop offset="42%" stop-color="#9a7c49"></stop>
+          <stop offset="78%" stop-color="#45331f"></stop>
+          <stop offset="100%" stop-color="#1d150e"></stop>
+        </radialGradient>
+        <radialGradient id="bootGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="55%" stop-color="rgba(216,191,134,.34)"></stop>
+          <stop offset="100%" stop-color="rgba(216,191,134,0)"></stop>
+        </radialGradient>
+      </defs>
+      <circle cx="80" cy="80" r="76" fill="url(#bootGlow)"></circle>
+      <circle cx="80" cy="80" r="52" fill="url(#bootSphere)" stroke="#d8bf86" stroke-width="1.4"></circle>
+      <g class="boot-globe-grid" fill="none" stroke="#f1e2bb" stroke-width=".9">
+        <ellipse cx="80" cy="80" rx="52" ry="52" stroke="#e8d6a8" stroke-width="1.2"></ellipse>
+        <ellipse cx="80" cy="80" rx="35" ry="52"></ellipse>
+        <ellipse cx="80" cy="80" rx="16" ry="52"></ellipse>
+        <ellipse cx="80" cy="80" rx="52" ry="20"></ellipse>
+        <ellipse cx="80" cy="80" rx="52" ry="38"></ellipse>
+        <line x1="80" y1="28" x2="80" y2="132"></line>
+      </g>
+      <ellipse cx="61" cy="53" rx="20" ry="12" fill="#f7e9c6" opacity=".16" transform="rotate(-28 61 53)"></ellipse>
+      <circle class="boot-orbit" cx="80" cy="80" r="64" fill="none" stroke="#b2965f" stroke-width="1" stroke-dasharray="2 9" opacity=".65"></circle>
+    </svg>
+  </div>
+  <div class="boot-title">Асамблея ОМБ</div>
+  <div class="boot-rule" aria-hidden="true"></div>
+  <div class="boot-sub">заседание открывается…</div>
+</div>
+
+<!-- Спрайт иконок -->
+<svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></symbol>
+  <symbol id="i-gavel" viewBox="0 0 24 24"><path d="M3.5 20.5 11 13"/><path d="M9.5 8.5 14.5 3.5l6 6-5 5z"/><path d="M12.5 5.5 18.5 11.5"/><path d="M14 12l-3 3"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L13 4.5v15l-5.5-5H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a9 9 0 0 1 0 12"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L13 4.5v15l-5.5-5H4z"/><path d="M16.5 9.5l5 5"/><path d="M21.5 9.5l-5 5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3.5v11"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 19.5h16"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 8V3h10v5"/><rect x="4.5" y="8" width="15" height="8" rx="1"/><path d="M7 16h10v5H7z"/><path d="M16.5 11h1.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-5L16.5 3.5l4 4L9 19l-5 1z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9.5 7V4h5v3"/><path d="M6 7l1 13.5h10L18 7"/><path d="M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16.2 14.5c2.7.3 4.8 2.6 4.8 5.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.1 3.4-7.5 7.5-7.5s7.5 3.4 7.5 7.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v12.5h14V8"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5V19h18V8.5H11L9 6.5z"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21.5V3"/><path d="M5 4c4-2.2 6 2.2 10 0v9c-4 2.2-6-2.2-10 0"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2.5-7.5z"/><path d="M10.5 13.5 21 3"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4 4v5h5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5 9.5 17.5 19.5 6.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 22 20.5H2z"/><path d="M12 9v5"/><circle cx="12" cy="17.2" r="0.9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></symbol>
+  <symbol id="i-ballot" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="1"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21M8.5 21h7"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4.2"/><path d="M11 11l9.5 9.5"/><path d="M17 17l2.2-2.2M19.5 19.5l2-2"/></symbol>
+  <symbol id="i-newspaper" viewBox="0 0 24 24"><path d="M4 5h13v14H4z"/><path d="M17 8h3v11H6"/><path d="M7 8h7M7 11h7M7 14h4"/></symbol>
+  <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="M8 12.5V6a3 3 0 0 1 6 0v10a5 5 0 0 1-10 0V8"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+</svg>
+
+<div id="app">
+  <div class="app-bg" aria-hidden="true"></div>
+  <div class="app-vignette" aria-hidden="true"></div>
+
+  <header id="app-header" class="app-header"></header>
+
+  <div id="app-body" class="app-body">
+    <aside id="left-panel" class="left-panel" aria-label="Делегации и президиум">
+      <div class="drawer-head">
+        <span>Делегации</span>
+        <button type="button" class="icon-btn drawer-close" id="left-close" aria-label="Закрыть панель">×</button>
+      </div>
+      <div id="left-body" class="left-body"></div>
+    </aside>
+
+    <main id="main" class="main">
+      <section id="hall-view" class="hall-view" aria-label="Зал заседаний">
+        <div class="hall-frame">
+          <div id="hall-stage" class="hall-stage"></div>
+          <div id="hall-tools" class="hall-tools"></div>
+        </div>
+        <div id="quick-actions" class="quick-actions" aria-label="Основные действия"></div>
+        <div id="hall-legend" class="hall-legend"></div>
+        <div id="voting-band"></div>
+      </section>
+
+      <section id="archive-view" class="archive-view" hidden aria-label="Архив документов"></section>
+    </main>
+
+    <aside id="side" class="side" aria-label="Рабочий стол">
+      <div class="drawer-head side-drawer-head">
+        <span>Рабочий стол</span>
+        <button type="button" class="icon-btn drawer-close" id="right-close" aria-label="Закрыть панель">×</button>
+      </div>
+      <div id="side-tabs" class="side-tabs"></div>
+      <div id="side-body" class="side-body"></div>
+    </aside>
+  </div>
+
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Основная навигация">
+    <button type="button" class="mnav-btn active" data-mnav="hall">
+      <svg class="icon" aria-hidden="true"><use href="#i-users"></use></svg><span>Зал</span>
+    </button>
+    <button type="button" class="mnav-btn" data-mnav="chat">
+      <svg class="icon" aria-hidden="true"><use href="#i-send"></use></svg><span>Чат</span>
+    </button>
+    <button type="button" class="mnav-btn" data-mnav="resolutions">
+      <svg class="icon" aria-hidden="true"><use href="#i-file"></use></svg><span>Резолюции</span>
+    </button>
+    <button type="button" class="mnav-btn" data-mnav="more">
+      <svg class="icon" aria-hidden="true"><use href="#i-menu"></use></svg><span>Ещё</span>
+    </button>
+  </nav>
+
+  <div id="drawer-scrim" class="drawer-scrim" hidden></div>
+
+  <footer id="ticker" class="ticker" aria-label="Лента событий Асамблеи"></footer>
+  <footer id="statusbar" class="statusbar"></footer>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+<div id="print-root"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+/* ============================================================
+   Мобильная версия, быстрые действия, шёпот, статус слова
+   ============================================================ */
+
+/* ---------- Быстрые действия ---------- */
+.quick-actions {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 7px 10px;
+  border-top: 1px solid rgba(178, 150, 95, .2);
+  background: linear-gradient(180deg, rgba(16, 12, 9, .5), rgba(12, 9, 7, .72));
+  position: relative;
+  z-index: 5;
+}
+.quick-btn {
+  flex: 1 1 auto;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #3d342b, #332b23);
+  color: var(--text);
+  font-family: var(--font-doc);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.quick-btn:hover { border-color: var(--beige-line); color: var(--paper-light); }
+.quick-btn .icon { width: 16px; height: 16px; color: var(--brass-light); }
+.quick-btn.primary {
+  border-color: rgba(147, 82, 75, .7);
+  background: linear-gradient(180deg, #7c3934, #642d29);
+  color: #f1e5d3;
+}
+.quick-btn.primary .icon { color: #f1d9ad; }
+.quick-btn:disabled { opacity: .45; cursor: not-allowed; }
+.quick-btn .q-note {
+  font-size: 8.5px;
+  letter-spacing: .03em;
+  text-transform: none;
+  color: var(--text-dim);
+}
+
+/* ---------- Шёпот в чате ---------- */
+.chat-mode-bar {
+  flex: none;
+  display: flex;
+  gap: 4px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(0, 0, 0, .16);
+}
+.chat-mode-btn {
+  flex: 1;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-doc);
+  font-size: 9.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.chat-mode-btn:hover { color: var(--text); background: rgba(255, 240, 210, .04); }
+.chat-mode-btn.active {
+  color: var(--paper-light);
+  border-color: rgba(178, 150, 95, .35);
+  background: rgba(178, 150, 95, .1);
+}
+.chat-mode-btn .icon { width: 14px; height: 14px; }
+.chat-whisper-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px 0;
+  font-family: var(--font-doc);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.chat-whisper-bar select {
+  flex: 1;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #2b241e;
+  color: var(--text);
+  font-family: var(--font-doc);
+  font-size: 11px;
+}
+.chat-msg.whisper .msg-text {
+  background: #262b33;
+  border-color: #4c5a6a;
+  border-left-color: var(--info);
+}
+.msg-whisper-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px;
+  border: 1px solid rgba(92, 115, 142, .6);
+  border-radius: 2px;
+  color: #a9bdd3;
+  font-family: var(--font-doc);
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.msg-whisper-to { color: #a9bdd3; font-size: 9px; }
+.chat-empty-whisper {
+  padding: 26px 16px;
+  text-align: center;
+  font-family: var(--font-doc);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+
+/* ---------- Статус в очереди на слово ---------- */
+.speech-mine {
+  margin: 8px 1px 2px;
+  padding: 8px 9px;
+  border: 1px solid rgba(177, 141, 79, .45);
+  border-radius: 3px;
+  background: rgba(177, 141, 79, .1);
+  font-family: var(--font-doc);
+  font-size: 9.5px;
+  line-height: 1.55;
+  color: #d9c7a4;
+}
+.speech-mine b { color: var(--paper-light); font-weight: 400; }
+.speech-mine .sp-note { display: block; margin-top: 3px; color: var(--text-dim); }
+.speech-item.mine {
+  border-color: rgba(178, 150, 95, .45);
+  background: rgba(178, 150, 95, .08);
+}
+.speech-item .sp-you {
+  flex: none;
+  padding: 0 4px;
+  border: 1px solid rgba(178, 150, 95, .4);
+  border-radius: 2px;
+  color: var(--brass-light);
+  font-size: 8px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ---------- «Ещё» ---------- */
+.mobile-more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mmore-btn {
+  min-height: 74px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #3d342b, #332b23);
+  color: var(--text);
+  font-family: var(--font-doc);
+  font-size: 10.5px;
+  letter-spacing: .05em;
+  text-align: left;
+  cursor: pointer;
+}
+.mmore-btn:hover { border-color: var(--beige-line); color: var(--paper-light); }
+.mmore-btn .icon { width: 20px; height: 20px; color: var(--brass-light); }
+.mmore-btn small { font-size: 8.5px; color: var(--text-dim); letter-spacing: .03em; }
+
+/* ---------- Нижняя навигация ---------- */
+.mobile-nav { display: none; }
+
+@media (max-width: 900px) {
+  :root { --mobile-nav-h: 62px; }
+
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    height: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid #0f0b08;
+    background:
+      linear-gradient(180deg, rgba(45, 36, 29, .98), rgba(25, 19, 15, .99)),
+      url('../images/paper-dark.jpg') center / cover;
+    box-shadow: 0 -8px 26px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(216, 191, 134, .16);
+  }
+  .mnav-btn {
+    position: relative;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    border-left: 1px solid rgba(0, 0, 0, .28);
+    background: transparent;
+    color: #a99a80;
+    font-family: var(--font-doc);
+    font-size: 9px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .mnav-btn:first-child { border-left: none; }
+  .mnav-btn .icon { width: 21px; height: 21px; }
+  .mnav-btn.active { color: #f1e5cc; background: rgba(178, 150, 95, .1); }
+  .mnav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 18%;
+    right: 18%;
+    height: 2px;
+    background: var(--brass-light);
+    box-shadow: 0 0 8px rgba(216, 191, 134, .55);
+  }
+  .mnav-btn:active { background: rgba(255, 240, 210, .08); }
+
+  .ticker,
+  .statusbar { display: none; }
+
+  .app-body {
+    padding-bottom: calc(var(--mobile-nav-h) + 8px + env(safe-area-inset-bottom));
+  }
+  .side,
+  .left-panel {
+    bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+  }
+  .drawer-scrim { bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom)); }
+
+  /* Первый экран проще: второстепенное — в «Ещё» и нижней панели */
+  .header-buttons #resolution-btn,
+  .header-buttons #archive-btn,
+  .header-buttons #settings-btn,
+  .header-buttons #sound-btn,
+  .header-buttons #right-toggle,
+  .header-buttons #left-toggle { display: none; }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    padding: 6px 7px;
+  }
+  .quick-btn {
+    min-height: 46px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px 3px;
+    font-size: 8.5px;
+    letter-spacing: .03em;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .quick-btn .icon { width: 18px; height: 18px; }
+  .quick-btn .q-note { display: none; }
+  .quick-actions .quick-btn:nth-child(4) { grid-column: auto; }
+
+  .hall-legend { font-size: 8px; }
+  .hall-legend .legend-chairs {
+    order: -1;
+    flex-basis: 100%;
+    font-size: 10.5px;
+    line-height: 1.45;
+    padding-bottom: 3px;
+    border-bottom: 1px dashed rgba(178, 150, 95, .2);
+  }
+  .hall-legend .legend-chairs b { font-size: 11.5px; }
+  .chat-compose textarea { font-size: 16px; }
+  .chat-compose .btn { min-width: 46px; height: 46px; }
+  .chat-compose { padding: 8px 9px 10px; }
+  .chat-mode-btn { min-height: 40px; font-size: 10px; }
+  .chat-whisper-bar select { min-height: 40px; font-size: 12px; }
+  .side-tab { min-height: 46px; font-size: 10px; }
+}
+
+@media (max-width: 640px) {
+  :root { --mobile-nav-h: 58px; }
+
+  .side,
+  .left-panel {
+    top: var(--header-h);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+  }
+  .side { transform: translateX(calc(100% + 12px)); right: 0; }
+  .left-panel { transform: translateX(calc(-100% - 12px)); left: 0; }
+  .side.open,
+  .left-panel.open { transform: none; }
+  .side-drawer-head,
+  .left-panel .drawer-head { display: flex; }
+
+  .mnav-btn { font-size: 8.5px; }
+  .mnav-btn .icon { width: 20px; height: 20px; }
+
+  .quick-btn { font-size: 8px; }
+  .hall-legend .legend-right { display: none; }
+
+  .mobile-more-grid { grid-template-columns: 1fr; }
+  .mmore-btn { min-height: 58px; flex-direction: row; align-items: center; }
+}
+
+@media (max-width: 380px) {
+  .mnav-btn span { font-size: 8px; }
+  .quick-btn { font-size: 7.5px; }
+  .quick-btn .icon { width: 16px; height: 16px; }
+}

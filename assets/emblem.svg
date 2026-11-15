@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <defs>
+    <path id="omb-star" d="M0 -6 L1.4 -1.9 L5.7 -1.9 L2.3 0.7 L3.5 4.9 L0 2.4 L-3.5 4.9 L-2.3 0.7 L-5.7 -1.9 L-1.4 -1.9 Z" fill="#ffffff"/>
+  </defs>
+
+  <!-- Перекрестия -->
+  <path d="M120 3 V60 M120 180 V237 M3 120 H60 M180 120 H237" stroke="#ffffff" stroke-width="2.6"/>
+
+  <!-- Звезда-роза ветров: четыре длинных и четыре коротких луча -->
+  <path d="M120 44 L134 106 L176 120 L134 134 L120 196 L106 134 L64 120 L106 106 Z"
+        fill="#ffffff" fill-opacity="0.92"/>
+  <path d="M120 82 L131 109 L158 120 L131 131 L120 158 L109 131 L82 120 L109 109 Z"
+        fill="#ffffff" fill-opacity="0.35"/>
+
+  <!-- Лавровые ветви -->
+  <g fill="#ffffff">
+    <path d="M136.6 41.7 A80 80 0 0 1 195.2 92.6" stroke="#ffffff" stroke-width="1.6" fill="none"/>
+    <ellipse cx="152" cy="48" rx="13" ry="5" transform="rotate(-53 152 48)"/>
+    <ellipse cx="165" cy="55" rx="13" ry="5" transform="rotate(-40 165 55)"/>
+    <ellipse cx="176" cy="65" rx="13" ry="5" transform="rotate(-27 176 65)"/>
+    <ellipse cx="185" cy="77" rx="13" ry="5" transform="rotate(-14 185 77)"/>
+    <ellipse cx="190" cy="90" rx="12" ry="4.6" transform="rotate(-2 190 90)"/>
+
+    <path d="M106.1 198.8 A80 80 0 0 1 41.8 136.6" stroke="#ffffff" stroke-width="1.6" fill="none"/>
+    <ellipse cx="88" cy="192" rx="13" ry="5" transform="rotate(-127 88 192)"/>
+    <ellipse cx="75" cy="185" rx="13" ry="5" transform="rotate(-140 75 185)"/>
+    <ellipse cx="64" cy="175" rx="13" ry="5" transform="rotate(-153 64 175)"/>
+    <ellipse cx="55" cy="163" rx="13" ry="5" transform="rotate(-166 55 163)"/>
+    <ellipse cx="50" cy="150" rx="12" ry="4.6" transform="rotate(-178 50 150)"/>
+  </g>
+
+  <!-- Дуги звёзд -->
+  <g>
+    <use href="#omb-star" transform="translate(31.1 96.2) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(38.0 78.2) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(48.5 62.1) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(62.1 48.5) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(78.2 38.0) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(96.2 31.1) scale(1.05)"/>
+
+    <use href="#omb-star" transform="translate(208.9 143.8) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(202.0 161.8) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(191.5 177.9) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(177.9 191.5) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(161.8 202.0) scale(1.05)"/>
+    <use href="#omb-star" transform="translate(143.8 208.9) scale(1.05)"/>
+  </g>
+
+  <!-- Кольцо и глобус -->
+  <circle cx="120" cy="120" r="54" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="120" cy="120" r="24" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <ellipse cx="120" cy="120" rx="10.5" ry="24" fill="none" stroke="#ffffff" stroke-width="2.2"/>
+  <ellipse cx="120" cy="120" rx="24" ry="8.5" fill="none" stroke="#ffffff" stroke-width="2.2"/>
+  <path d="M96.5 111 H143.5 M96.5 129 H143.5" stroke="#ffffff" stroke-width="1.8"/>
+</svg>
