@@ -20,6 +20,8 @@ import { renderArchive } from './ui/archive.js';
 import { openDiplomatForm, openDiplomatCard, openChairmanPicker } from './ui/diplomats.js';
 import { openLoginModal } from './ui/login.js';
 import { openProtoViewer } from './ui/viewers.js';
+import { openNetworkModal } from './ui/network.js';
+import { initNet, netInfo } from './net.js';
 import { api } from './api.js';
 import { unlockAudio } from './audio.js';
 
@@ -222,9 +224,11 @@ function openMobileMore() {
   const state = get();
   const actor = activeDiplomat(state);
   const voting = openVoting(state);
+  const net = netInfo();
   const body = `
     <div class="mobile-more-grid">
       <button type="button" class="mmore-btn" data-mmore="people">${icon('i-users')}Делегации<small>список и президиум</small></button>
+      <button type="button" class="mmore-btn" data-mmore="net">${icon('i-globe')}Общий зал<small>${net.room ? `код ${esc(net.room)}` : 'игра с друзьями'}</small></button>
       <button type="button" class="mmore-btn" data-mmore="journal">${icon('i-clock')}Журнал<small>события заседания</small></button>
       <button type="button" class="mmore-btn" data-mmore="archive">${icon('i-archive')}Архив<small>документы и протоколы</small></button>
       <button type="button" class="mmore-btn" data-mmore="summary">${icon('i-eye')}Сводка<small>состояние зала</small></button>
@@ -246,6 +250,7 @@ function openMobileMore() {
       closeModal();
       const action = btn.dataset.mmore;
       if (action === 'archive') { location.hash = '#/archive'; return; }
+      if (action === 'net') { openNetworkModal(); return; }
       if (action === 'speech') { openSpeechRequest(); return; }
       if (action === 'summary') { openSessionSummary(); return; }
       if (action === 'profile') { document.getElementById('profile-btn')?.click(); return; }
@@ -702,12 +707,22 @@ function renderStatusbar() {
   const seated = state.diplomats.filter((d) => d.seatId && !String(d.seatId).startsWith('chair')).length;
   const voting = openVoting(state);
   const q = quorumInfo(state);
+  const net = netInfo();
+  const netClass = net.status === 'online' ? 'ok' : net.status === 'idle' ? '' : 'warn';
+  const netLabel = net.status === 'online'
+    ? `Зал ${esc(net.room)} · ${net.online}`
+    : net.status === 'connecting'
+      ? 'Зал: подключение…'
+      : net.status === 'offline' ? 'Зал: переподключение…' : 'Общий зал';
 
   host.innerHTML = `
     <span class="sb-live">Заседание идёт · <b id="status-elapsed">${fmtElapsed(state.sessionStartedAt)}</b></span>
     <span class="sb-hide-m">Президиум: <b>${chairs.length ? chairs.map((c) => esc(c.fullName)).join(' · ') : 'не назначен'}</b></span>
     <span class="sb-hide-m">Активный: <b>${actor ? esc(`${actor.fullName} (${actor.country})`) : 'не выбран'}</b></span>
     <span class="sb-right">
+      <button type="button" class="sb-net ${netClass}" id="net-chip" title="Общий зал: заседание для друзей">
+        ${icon('i-globe')} ${netLabel}
+      </button>
       <span>${voting ? '<b style="color:#d8a79f">Идёт голосование</b>' : `Кворум ${q.met ? 'есть' : 'нет'}`}</span>
       <span>В зале <b>${seated}/${Number(state.settings?.seatCount) || 46}</b></span>
       <span>Резолюций <b>${state.resolutions.length}</b></span>
@@ -834,6 +849,7 @@ function openSessionSummary() {
 function maybeShowWelcome() {
   const state = get();
   if (state.diplomats.length) return;
+  if (netInfo().room) return;
   try {
     if (sessionStorage.getItem('omb.welcomeSeen')) return;
     sessionStorage.setItem('omb.welcomeSeen', '1');
@@ -854,7 +870,8 @@ function maybeShowWelcome() {
       <li><b>Два председателя</b> — ведут регламент, открывают и закрывают голосования, модерируют чат и документы, отправляют документы в архив.</li>
     </ol>
     <div class="mini-note" style="margin-top:10px">
-      Правило зала: одна страна — один голос. Все данные хранятся в этом браузере; пароли сохраняются только в виде хэшей.
+      Правило зала: одна страна — один голос. Данные хранятся в этом браузере; чтобы вести заседание
+      вместе с друзьями, создайте «Общий зал» внизу экрана или в меню «Ещё».
     </div>`;
 
   const footer = document.createElement('div');
@@ -1008,6 +1025,12 @@ function boot() {
   window.addEventListener('hashchange', () => refreshAll());
   subscribe(() => { refreshAll(); });
 
+  window.addEventListener('omb:net', () => { refreshAll(); });
+
+  $('#statusbar')?.addEventListener('click', (event) => {
+    if (event.target.closest('#net-chip')) openNetworkModal();
+  });
+
   window.addEventListener('omb:storage-error', () => {
     toast('Не удалось сохранить данные в браузере. Проверьте свободное место и приватный режим.', {
       kind: 'bad',
@@ -1016,6 +1039,7 @@ function boot() {
   });
 
   window.addEventListener('storage', (event) => {
+    if (netInfo().status === 'online') return;
     if (event.key === 'omb.state.v1' && event.newValue) {
       toast('Состояние заседания изменено в другой вкладке. Обновите страницу, чтобы синхронизироваться.', {
         kind: 'warn',
@@ -1034,6 +1058,7 @@ function boot() {
 
   setupHallTools();
   setInterval(updateClocks, 1000);
+  initNet();
   setTimeout(maybeShowWelcome, 420);
 }
 

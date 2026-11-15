@@ -1161,3 +1161,92 @@
   .admin-row-actions { width: 100%; justify-content: flex-end; }
   .admin-list { max-height: none; }
 }
+
+/* ---------- Общий зал ---------- */
+.statusbar .sb-net {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #a99a80;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.statusbar .sb-net .icon { width: 12px; height: 12px; }
+.statusbar .sb-net:hover { color: var(--brass-light); }
+.statusbar .sb-net.ok { color: var(--brass-light); }
+.statusbar .sb-net.ok::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ok-bright);
+  box-shadow: 0 0 6px rgba(131, 145, 96, .8);
+}
+.statusbar .sb-net.warn { color: #c9a06a; }
+
+.net-card {
+  background: rgba(20, 16, 13, .45);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 12px;
+}
+.net-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.net-card-head .section-label { margin: 0; }
+.net-code {
+  font-family: var(--font-doc);
+  font-size: 16px;
+  letter-spacing: .22em;
+  color: var(--brass-light);
+  padding: 2px 8px;
+  border: 1px solid var(--brass-dark);
+  background: rgba(178, 150, 95, .08);
+  border-radius: 3px;
+}
+.net-state {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #c9a06a;
+}
+.net-state.ok { color: var(--ok-bright); }
+.net-copy {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.net-copy .input { flex: 1; min-width: 0; font-size: 11px; }
+.net-copy .btn { flex: none; white-space: nowrap; }
+.net-peers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.net-peer {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  background: rgba(178, 150, 95, .06);
+  color: var(--text-dim);
+}
+.net-peer.self { color: var(--brass-light); border-color: var(--brass-dark); }
+
+@media (max-width: 640px) {
+  .net-copy { flex-wrap: wrap; }
+  .net-copy .input { flex-basis: 100%; }
+  .net-copy .btn { width: 100%; justify-content: center; }
+  .net-state { margin-left: 0; }
+}

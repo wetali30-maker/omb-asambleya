@@ -219,6 +219,8 @@ let state = load();
 // Фиксируем миграции (кресла президиума, код администратора) сразу после загрузки.
 save();
 const subscribers = new Set();
+const changeHooks = new Set();
+let applyingRemote = false;
 
 export function get() {
   return state;
@@ -243,6 +245,7 @@ export function commit(mutator) {
   mutator(state);
   save();
   emit();
+  if (!applyingRemote) notifyChange();
 }
 
 export function subscribe(fn) {
@@ -250,14 +253,52 @@ export function subscribe(fn) {
   return () => subscribers.delete(fn);
 }
 
+// Сетевой слой подписывается здесь, чтобы публиковать только локальные действия.
+export function onLocalChange(fn) {
+  changeHooks.add(fn);
+  return () => changeHooks.delete(fn);
+}
+
+function notifyChange() {
+  for (const fn of changeHooks) {
+    try { fn(state); } catch (err) { console.error('Ошибка синхронизации', err); }
+  }
+}
+
+// Изменение, пришедшее из сети: сохраняем и перерисовываем, но обратно не публикуем.
+export function applyRemote(mutator) {
+  applyingRemote = true;
+  try {
+    mutator(state);
+    save();
+    emit();
+  } finally {
+    applyingRemote = false;
+  }
+}
+
+// Снимок общего зала целиком заменяет локальное состояние.
+export function adoptRemote(next) {
+  applyingRemote = true;
+  try {
+    state = migrate(next);
+    save();
+    emit();
+  } finally {
+    applyingRemote = false;
+  }
+}
+
 export function replaceState(next) {
   state = migrate(next);
   save();
   emit();
+  if (!applyingRemote) notifyChange();
 }
 
 export function hardReset() {
   state = defaultState();
   save();
   emit();
+  if (!applyingRemote) notifyChange();
 }
