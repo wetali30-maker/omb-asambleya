@@ -11,6 +11,7 @@ import { toast } from './ui/modal.js';
 
 const CFG_KEY = 'omb.net.v1';
 const TOMB_KEY = 'omb.net.tomb.v1';
+const META_KEY = 'omb.net.meta.v1';
 const BACKUP_KEY = 'omb.prejoin.v1';
 const BROKER_KEY = 'omb.net.broker';
 const TOPIC_BASE = 'omb/asambleya/v1';
@@ -22,6 +23,7 @@ const COLLECTIONS = ['diplomats', 'chat', 'resolutions', 'votings', 'archive', '
 const STAMP_KEYS = ['_syncAt', 'updatedAt', 'ts', 'createdAt', 'startedAt', 'finishedAt', 'openedAt', 'closedAt'];
 const ROOM_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_IMAGE_DATA = 240000;
+const MAX_RETAINED = 120000;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -93,6 +95,8 @@ let ready = false;
 let roomReadyOnce = false;
 let clone = null;
 let lastMetaAt = 0;
+let metaSeen = '';
+let pendingMetaAt = 0;
 let reconnectAttempt = 0;
 let retryTimer = null;
 let pingTimer = null;
@@ -204,8 +208,8 @@ function subscribeFrame() {
   return frame(0x82, concat([Uint8Array.of(0, 1), utf8(topic()), Uint8Array.of(0)]));
 }
 
-function publishFrame(message) {
-  return frame(0x30, concat([utf8(topic()), encoder.encode(JSON.stringify(message))]));
+function publishFrame(message, retain = false) {
+  return frame(retain ? 0x31 : 0x30, concat([utf8(topic()), encoder.encode(JSON.stringify(message))]));
 }
 
 function sendRaw(bytes) {
@@ -253,7 +257,11 @@ function parsePackets() {
 /* ------------------------------------------------------------------ */
 
 export function initNet() {
-  onLocalChange(() => { publishPatch(); });
+  onLocalChange(() => {
+    if (JSON.stringify(metaParts(get())) !== metaSeen) pendingMetaAt = Date.now();
+    publishPatch();
+  });
+  metaSeen = JSON.stringify(metaParts(get()));
 
   window.addEventListener('pagehide', () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -283,6 +291,7 @@ export function initNet() {
     room = saved.room;
     config = saved;
     nick = saved.nick;
+    lastMetaAt = metaAtOf(saved.room);
     openSocket();
   }
 }
@@ -308,7 +317,9 @@ export function joinRoom(code, options = {}) {
   ready = false;
   roomReadyOnce = false;
   clone = null;
-  lastMetaAt = 0;
+  lastMetaAt = metaAtOf(roomCode);
+  metaSeen = JSON.stringify(metaParts(get()));
+  pendingMetaAt = 0;
   imageChecked = new Set();
   status = 'connecting';
   reconnectAttempt = 0;
@@ -325,6 +336,7 @@ export function leaveRoom() {
   ready = false;
   roomReadyOnce = false;
   clone = null;
+  lastMetaAt = 0;
   peers.clear();
   status = 'idle';
   writeConfig({ room: '', auto: false });
@@ -475,14 +487,40 @@ function onConnected() {
 
 function seedRoom() {
   clone = cloneState();
-  lastMetaAt = Date.now();
   ready = true;
   roomReadyOnce = true;
-  sendJson({
-    t: 'state', id: clientId, nick: presenceNick(), at: Date.now(), state: get(), tombs: tombs[room] || {},
-  });
+  const metaAt = syncMetaStamp();
+  const payload = {
+    t: 'state', id: clientId, nick: presenceNick(), at: Date.now(), metaAt, state: get(), tombs: tombs[room] || {},
+  };
+  const sent = sendJson(payload);
+  if (sent) {
+    resetMetaSeen();
+    maybeRetain(true);
+  }
   ensureImages();
   notify();
+}
+
+// Снимок зала остаётся на брокере (retain): новый участник получает данные,
+// даже если все прежние вкладки закрыты или спят.
+let lastRetainAt = 0;
+
+function maybeRetain(force = false) {
+  if (!room || status !== 'online' || !ready) return;
+  const now = Date.now();
+  if (!force && now - lastRetainAt < 15000) return;
+  const metaAt = syncMetaStamp();
+  const count = COLLECTIONS.reduce((sum, key) => sum + (get()[key] || []).length, 0);
+  if (count === 0 && metaAt === 0) return;
+  const payload = {
+    t: 'state', id: clientId, nick: presenceNick(), at: now, metaAt, state: get(), tombs: tombs[room] || {},
+  };
+  if (JSON.stringify(payload).length > MAX_RETAINED) return;
+  if (sendRaw(publishFrame(payload, true))) {
+    lastRetainAt = now;
+    resetMetaSeen();
+  }
 }
 
 function prunePeers() {
@@ -581,9 +619,11 @@ function scheduleSnapshot(peerId) {
     if (!peers.has(peerId)) return;
     const rivals = [...peers.keys()].filter((id) => id !== peerId).sort();
     if (rivals.length && rivals[0] < clientId) return;
-    sendJson({
-      t: 'state', id: clientId, to: peerId, nick: presenceNick(), at: Date.now(), state: get(), tombs: tombs[room] || {},
+    const metaAt = syncMetaStamp();
+    const sent = sendJson({
+      t: 'state', id: clientId, to: peerId, nick: presenceNick(), at: Date.now(), metaAt, state: get(), tombs: tombs[room] || {},
     });
+    if (sent) resetMetaSeen();
   }, delay);
 }
 
@@ -614,7 +654,8 @@ function adoptSnapshot(message) {
   }
   adoptRemote(next);
   clone = cloneState();
-  lastMetaAt = Number(message.at) || Date.now();
+  stampMetaAt(Number(message.metaAt) || 0);
+  resetMetaSeen();
   ready = true;
   roomReadyOnce = true;
   imageChecked = new Set();
@@ -637,6 +678,12 @@ function mergeSnapshot(message) {
 
   const activeId = get().activeDiplomatId;
   const soundOn = get().settings?.soundOn;
+  const remoteMetaAt = Number(message.metaAt) || 0;
+  const countOf = (value) => COLLECTIONS.reduce(
+    (sum, key) => sum + (Array.isArray(value?.[key]) ? value[key].length : 0), 0,
+  );
+  const takeMeta = remoteMetaAt > lastMetaAt
+    || (remoteMetaAt === lastMetaAt && countOf(remote) > countOf(get()));
 
   applyRemote((target) => {
     for (const collection of COLLECTIONS) {
@@ -657,11 +704,13 @@ function mergeSnapshot(message) {
       target[collection] = merged;
     }
 
-    if (remote.settings) target.settings = { ...target.settings, ...remote.settings, soundOn };
-    if (remote.sessionId) target.sessionId = remote.sessionId;
-    if (Number.isFinite(Number(remote.sessionStartedAt))) target.sessionStartedAt = Number(remote.sessionStartedAt);
-    if (Array.isArray(remote.admins)) target.admins = remote.admins;
-    if (remote.timer && typeof remote.timer === 'object') target.timer = remote.timer;
+    if (takeMeta) {
+      if (remote.settings) target.settings = { ...target.settings, ...remote.settings, soundOn };
+      if (remote.sessionId) target.sessionId = remote.sessionId;
+      if (Number.isFinite(Number(remote.sessionStartedAt))) target.sessionStartedAt = Number(remote.sessionStartedAt);
+      if (Array.isArray(remote.admins)) target.admins = remote.admins;
+      if (remote.timer && typeof remote.timer === 'object') target.timer = remote.timer;
+    }
     mergeSeating(target, remote.seating);
     target.activeDiplomatId = target.diplomats.some((d) => d.id === activeId) ? activeId : null;
     sortState(target);
@@ -673,11 +722,12 @@ function mergeSnapshot(message) {
 
   ready = true;
   roomReadyOnce = true;
-  lastMetaAt = Math.max(lastMetaAt, Number(message.at) || 0);
+  if (takeMeta) stampMetaAt(remoteMetaAt);
   // Исцеляем расхождение: отправляем то, чего нет у отправителя снимка.
   clone = cloneState(remote);
   persistTombs();
   publishPatch();
+  resetMetaSeen();
   imageChecked = new Set();
   ensureImages();
   notify();
@@ -775,30 +825,38 @@ function stripSound(settings = {}) {
   return rest;
 }
 
+function metaParts(value) {
+  return {
+    settings: stripSound(value?.settings),
+    seating: value?.seating,
+    timer: value?.timer,
+    sessionId: value?.sessionId,
+    sessionStartedAt: value?.sessionStartedAt,
+    admins: value?.admins,
+  };
+}
+
+function syncMetaStamp() {
+  const at = Math.max(lastMetaAt, pendingMetaAt);
+  if (at > lastMetaAt) stampMetaAt(at);
+  return at;
+}
+
+function resetMetaSeen() {
+  metaSeen = JSON.stringify(metaParts(get()));
+  pendingMetaAt = 0;
+}
+
 function buildMeta(prev, next, at) {
   if (!prev) return null;
-  const before = {
-    settings: stripSound(prev.settings),
-    seating: prev.seating,
-    timer: prev.timer,
-    sessionId: prev.sessionId,
-    sessionStartedAt: prev.sessionStartedAt,
-    admins: prev.admins,
-  };
-  const after = {
-    settings: stripSound(next.settings),
-    seating: next.seating,
-    timer: next.timer,
-    sessionId: next.sessionId,
-    sessionStartedAt: next.sessionStartedAt,
-    admins: next.admins,
-  };
+  const before = metaParts(prev);
+  const after = metaParts(next);
   if (JSON.stringify(before) === JSON.stringify(after)) return null;
   return { ...after, at };
 }
 
 function applyMeta(target, meta) {
-  lastMetaAt = Number(meta.at) || lastMetaAt;
+  stampMetaAt(Number(meta.at) || lastMetaAt);
   if (meta.settings) target.settings = { ...target.settings, ...meta.settings, soundOn: target.settings.soundOn };
   if (meta.seating && typeof meta.seating === 'object') target.seating = meta.seating;
   if (meta.timer && typeof meta.timer === 'object') target.timer = meta.timer;
@@ -840,8 +898,13 @@ function publishPatch() {
   if (patch.ops.length) save();
   const payload = { t: 'p', id: clientId, nick: presenceNick(), at: patch.at, ops: patch.ops, meta: patch.meta };
   if (!sendJson(payload)) return;
+  if (patch.meta) {
+    stampMetaAt(patch.meta.at);
+    resetMetaSeen();
+  }
   clone = cloneState();
   persistTombs();
+  maybeRetain();
 }
 
 function applyPatch(message) {
@@ -894,7 +957,9 @@ function applyPatch(message) {
   if (changed) {
     clone = cloneState();
     persistTombs();
+    resetMetaSeen();
     ensureImages();
+    maybeRetain();
   }
 }
 
@@ -903,6 +968,27 @@ function applyPatch(message) {
 /* ------------------------------------------------------------------ */
 
 let tombs = readTombs();
+let metaStamps = readMetaMap();
+
+function readMetaMap() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    return raw && typeof raw === 'object' ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+function metaAtOf(code) {
+  return Number(metaStamps[code]) || 0;
+}
+
+function stampMetaAt(at) {
+  if (!room) return;
+  lastMetaAt = Number(at) || 0;
+  metaStamps[room] = lastMetaAt;
+  try { localStorage.setItem(META_KEY, JSON.stringify(metaStamps)); } catch { /* noop */ }
+}
 
 function readTombs() {
   try {
